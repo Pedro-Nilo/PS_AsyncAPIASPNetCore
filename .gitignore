@@ -1,3 +1,5 @@
 .vscode
 Books.API/bin
 Books.API/obj
+BookCovers.API/bin
+BookCovers.API/obj

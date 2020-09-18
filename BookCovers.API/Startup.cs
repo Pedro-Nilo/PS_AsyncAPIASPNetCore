@@ -1,17 +1,10 @@
-using System;
-using System.Net.Http;
-using AutoMapper;
-using Books.API.Contexts;
-using Books.API.Services;
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
-
-namespace Books.API
+namespace BookCovers.API
 {
     public class Startup
     {
@@ -19,7 +12,6 @@ namespace Books.API
         {
             Configuration = configuration;
         }
-        
 
         public IConfiguration Configuration { get; }
 
@@ -27,18 +19,6 @@ namespace Books.API
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
-
-            var connectionString = Configuration["ConnectionStrings:BooksDBConnectionString"];
-
-            services.AddHttpClient<HttpClient>()
-                .ConfigurePrimaryHttpMessageHandler((handler =>
-                    new HttpClientHandler()
-                    {
-                        ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => { return true; }
-                    }));
-            services.AddDbContext<BooksContext>(options => options.UseNpgsql(connectionString));
-            services.AddScoped<IBooksRepository, BooksRepository>();
-            services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
