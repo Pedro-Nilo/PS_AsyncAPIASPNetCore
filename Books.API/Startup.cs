@@ -1,17 +1,12 @@
 using Books.API.Contexts;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using Books.API.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
+
 
 namespace Books.API
 {
@@ -21,6 +16,7 @@ namespace Books.API
         {
             Configuration = configuration;
         }
+        
 
         public IConfiguration Configuration { get; }
 
@@ -30,7 +26,9 @@ namespace Books.API
             services.AddControllers();
 
             var connectionString = Configuration["ConnectionStrings:BooksDBConnectionString"];
-            services.AddDbContext<BooksContext>(options => options.UseSqlServer(connectionString));            
+
+            services.AddDbContext<BooksContext>(options => options.UseNpgsql(connectionString));
+            services.AddScoped<IBooksRepository, BooksRepository>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
