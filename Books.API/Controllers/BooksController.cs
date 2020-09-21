@@ -62,6 +62,16 @@ namespace Books.API.Controllers
             return Ok((bookEntity, bookCovers));
         }
 
+        // [HttpGet]
+        // [BooksResultFilter]
+        // public IActionResult GetBooks()
+        // {
+        //     .Result() or .Wait() block thread resulting in a waste of async capabilities
+        //     var bookEntities = _booksRepository.GetBooksAsync().Result;
+
+        //     return Ok(bookEntities);
+        // }
+
         [HttpGet]
         [BooksResultFilter]
         public async Task<IActionResult> GetBooks()

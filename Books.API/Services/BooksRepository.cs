@@ -83,9 +83,28 @@ namespace Books.API.Services
                 .Include(book => book.Author)
                 .ToList();
         }
+
+        // private Task<int> GetBookPages()
+        // {
+        //     Task.Run must be avoid on server side applications
+        //     return Task.Run(() =>
+        //     {
+        //         var pageCalculator = new Books.Legacy.ComplicatedPageCalculator();
+
+        //         _logger.LogInformation($"ThreadId when calculating the amount of pages: " +
+        //             $"{System.Threading.Thread.CurrentThread.ManagedThreadId}");
+
+        //         return pageCalculator.CalculateBookPages();
+        //     });
+        // }
         
         public async Task<Book> GetBookAsync(Guid id)
         {
+            // _logger.LogInformation($"ThreadId when entering GetBookAsync: " +
+            //         $"{System.Threading.Thread.CurrentThread.ManagedThreadId}");
+
+            // var bookPages = await GetBookPages();
+
             return await _context.Books
                 .Include(book => book.Author)
                 .FirstOrDefaultAsync(book => book.Id == id);

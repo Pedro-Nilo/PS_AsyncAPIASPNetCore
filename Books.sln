@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Books.API", "Books.API\Book
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BookCovers.API", "BookCovers.API\BookCovers.API.csproj", "{F03786D0-6496-4900-BC2D-B4B402C4653C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Books.Legacy", "Books.Legacy\Books.Legacy.csproj", "{205BC656-E8F5-4664-8273-A7A77F5B3752}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -44,5 +46,17 @@ Global
 		{F03786D0-6496-4900-BC2D-B4B402C4653C}.Release|x64.Build.0 = Release|Any CPU
 		{F03786D0-6496-4900-BC2D-B4B402C4653C}.Release|x86.ActiveCfg = Release|Any CPU
 		{F03786D0-6496-4900-BC2D-B4B402C4653C}.Release|x86.Build.0 = Release|Any CPU
+		{205BC656-E8F5-4664-8273-A7A77F5B3752}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{205BC656-E8F5-4664-8273-A7A77F5B3752}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{205BC656-E8F5-4664-8273-A7A77F5B3752}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{205BC656-E8F5-4664-8273-A7A77F5B3752}.Debug|x64.Build.0 = Debug|Any CPU
+		{205BC656-E8F5-4664-8273-A7A77F5B3752}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{205BC656-E8F5-4664-8273-A7A77F5B3752}.Debug|x86.Build.0 = Debug|Any CPU
+		{205BC656-E8F5-4664-8273-A7A77F5B3752}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{205BC656-E8F5-4664-8273-A7A77F5B3752}.Release|Any CPU.Build.0 = Release|Any CPU
+		{205BC656-E8F5-4664-8273-A7A77F5B3752}.Release|x64.ActiveCfg = Release|Any CPU
+		{205BC656-E8F5-4664-8273-A7A77F5B3752}.Release|x64.Build.0 = Release|Any CPU
+		{205BC656-E8F5-4664-8273-A7A77F5B3752}.Release|x86.ActiveCfg = Release|Any CPU
+		{205BC656-E8F5-4664-8273-A7A77F5B3752}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
