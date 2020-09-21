@@ -38,6 +38,26 @@ namespace Books.API.Services
 
             _context.Add(bookToAdd);
         }
+
+        private async Task<BookCover> DownloadBookCoverAsync(
+            HttpClient httpClient, string bookCoverUrl)
+        {
+            var response = await httpClient.GetAsync(bookCoverUrl);
+
+            if(response.IsSuccessStatusCode)
+            {
+                var bookCover = JsonSerializer.Deserialize<BookCover>(
+                    await response.Content.ReadAsStringAsync(),
+                    new JsonSerializerOptions
+                    {
+                        PropertyNameCaseInsensitive = true,
+                    });
+
+                return bookCover;
+            }
+
+            return null;
+        }
         
         public Book GetBook(Guid id)
         {
@@ -92,6 +112,29 @@ namespace Books.API.Services
             }
 
             return null;
+        }
+
+        public async Task<IEnumerable<BookCover>> GetBookCoversAsync(Guid bookId)
+        {
+            var httpClient = _httpClientFactory.CreateClient("HttpClient");
+            var bookCovers = new List<BookCover>();
+            var bookCoverUrls = new []
+            {
+                $"http://127.0.0.1:5050/api/bookcovers/{bookId}-dummycover1",
+                $"http://127.0.0.1:5050/api/bookcovers/{bookId}-dummycover2",
+                $"http://127.0.0.1:5050/api/bookcovers/{bookId}-dummycover3",
+                $"http://127.0.0.1:5050/api/bookcovers/{bookId}-dummycover4",
+                $"http://127.0.0.1:5050/api/bookcovers/{bookId}-dummycover5"
+            };
+
+            var downloadBookCoverTasksQuery = 
+                from bookCoverUrl
+                in bookCoverUrls
+                select DownloadBookCoverAsync(httpClient, bookCoverUrl);
+
+            var downloadBookCoverTasks = downloadBookCoverTasksQuery.ToList();
+
+            return await Task.WhenAll(downloadBookCoverTasks);
         }
 
         public async Task<bool> SaveChangesAsync()

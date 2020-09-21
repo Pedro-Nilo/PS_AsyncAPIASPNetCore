@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using AutoMapper;
 using Books.API.Filters;
@@ -46,7 +47,7 @@ namespace Books.API.Controllers
 
         [HttpGet]
         [Route("{id}", Name = "GetBook")]
-        [BookResultFilter()]
+        [BookWithCoversResultFilter]
         public async Task<IActionResult> GetBook(Guid id)
         {
             var bookEntity = await _booksRepository.GetBookAsync(id);
@@ -56,13 +57,13 @@ namespace Books.API.Controllers
                 return NotFound();
             }
 
-            var bookCover = await _booksRepository.GetBookCoverAsync("dummycover");
-
-            return Ok(bookEntity);
+            var bookCovers = await _booksRepository.GetBookCoversAsync(id);
+            
+            return Ok((bookEntity, bookCovers));
         }
 
         [HttpGet]
-        [BooksResultFilter()]
+        [BooksResultFilter]
         public async Task<IActionResult> GetBooks()
         {
             var bookEntities = await _booksRepository.GetBooksAsync();

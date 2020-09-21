@@ -21,6 +21,8 @@ namespace Books.API.Services
 
         Task<BookCover> GetBookCoverAsync(string coverId);
 
+        Task<IEnumerable<BookCover>> GetBookCoversAsync(Guid bookId);
+
         Task<bool> SaveChangesAsync();
     }
 }
