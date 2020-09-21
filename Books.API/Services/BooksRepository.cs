@@ -3,12 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 using Books.API.Contexts;
 using Books.API.Entities;
 using Books.API.ExternalModels;
 using Microsoft.EntityFrameworkCore;
-
+using Microsoft.Extensions.Logging;
 
 namespace Books.API.Services
 {
@@ -17,21 +18,27 @@ namespace Books.API.Services
         private BooksContext _context;
 
         private readonly IHttpClientFactory _httpClientFactory;
+
+        private readonly ILogger<BooksRepository> _logger;
+
+        private CancellationTokenSource _cancellationTokenSource;
         
 
         public BooksRepository(BooksContext context,
-            IHttpClientFactory httpClientFactory)
+            IHttpClientFactory httpClientFactory,
+            ILogger<BooksRepository> logger)
         {
             _context = context ??
                 throw new ArgumentNullException(nameof(context));
             _httpClientFactory = httpClientFactory ??
                 throw new ArgumentNullException(nameof(httpClientFactory));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
 
         public void AddBook(Book bookToAdd)
         {
-            if(bookToAdd == null)
+            if (bookToAdd == null)
             {
                 throw new ArgumentNullException(nameof(bookToAdd));
             }
@@ -40,11 +47,13 @@ namespace Books.API.Services
         }
 
         private async Task<BookCover> DownloadBookCoverAsync(
-            HttpClient httpClient, string bookCoverUrl)
+            HttpClient httpClient, string bookCoverUrl,
+            CancellationToken cancellationToken)
         {
-            var response = await httpClient.GetAsync(bookCoverUrl);
+            var response = await httpClient
+                .GetAsync(bookCoverUrl, cancellationToken);
 
-            if(response.IsSuccessStatusCode)
+            if (response.IsSuccessStatusCode)
             {
                 var bookCover = JsonSerializer.Deserialize<BookCover>(
                     await response.Content.ReadAsStringAsync(),
@@ -56,6 +65,7 @@ namespace Books.API.Services
                 return bookCover;
             }
 
+            _cancellationTokenSource.Cancel();
             return null;
         }
         
@@ -101,7 +111,7 @@ namespace Books.API.Services
             var response = await httpClient
                 .GetAsync($"http://127.0.0.1:5050/api/bookcovers/{coverId}");
             
-            if(response.IsSuccessStatusCode)
+            if (response.IsSuccessStatusCode)
             {
                 return JsonSerializer.Deserialize<BookCover>(
                     await response.Content.ReadAsStringAsync(),
@@ -118,9 +128,13 @@ namespace Books.API.Services
         {
             var httpClient = _httpClientFactory.CreateClient("HttpClient");
             var bookCovers = new List<BookCover>();
+
+            _cancellationTokenSource = new CancellationTokenSource();
+
             var bookCoverUrls = new []
             {
                 $"http://127.0.0.1:5050/api/bookcovers/{bookId}-dummycover1",
+                //$"http://127.0.0.1:5050/api/bookcovers/{bookId}-dummycover2?returnFault=true",
                 $"http://127.0.0.1:5050/api/bookcovers/{bookId}-dummycover2",
                 $"http://127.0.0.1:5050/api/bookcovers/{bookId}-dummycover3",
                 $"http://127.0.0.1:5050/api/bookcovers/{bookId}-dummycover4",
@@ -130,11 +144,31 @@ namespace Books.API.Services
             var downloadBookCoverTasksQuery = 
                 from bookCoverUrl
                 in bookCoverUrls
-                select DownloadBookCoverAsync(httpClient, bookCoverUrl);
+                select DownloadBookCoverAsync(httpClient, bookCoverUrl,
+                    _cancellationTokenSource.Token);
 
             var downloadBookCoverTasks = downloadBookCoverTasksQuery.ToList();
 
-            return await Task.WhenAll(downloadBookCoverTasks);
+            try
+            {
+                return await Task.WhenAll(downloadBookCoverTasks);
+            }
+            catch (OperationCanceledException operationCanceledException)
+            {
+                _logger.LogInformation($"{operationCanceledException.Message}");
+
+                foreach (var task in downloadBookCoverTasks)
+                {
+                    _logger.LogInformation($"Task {task.Id} has status {task.Status}");
+                }
+
+                return new List<BookCover>();
+            }
+            catch (Exception exception)
+            {
+                _logger.LogInformation($"{exception.Message}");
+                throw;
+            }
         }
 
         public async Task<bool> SaveChangesAsync()
@@ -157,6 +191,12 @@ namespace Books.API.Services
                 {
                     _context.Dispose();
                     _context = null;
+                }
+
+                if(_cancellationTokenSource != null)
+                {
+                    _cancellationTokenSource.Dispose();
+                    _cancellationTokenSource = null;
                 }
             }
         }
